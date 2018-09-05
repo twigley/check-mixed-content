@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
-const Crawler = require('easycrawler')
-const cheerio = require('cheerio')
+const Crawler = require('easycrawler');
+const cheerio = require('cheerio');
 const colors = require('colors');
 const argv = require('yargs').argv
 
@@ -30,6 +30,7 @@ let crawler = new Crawler({
         let bad = false
         let $ = cheerio.load(data.body)
         let currAttr;
+        let badUrls = [];
 
         for(let element of elementsToCheck) {
             $(element).each((index, item) => {
@@ -37,6 +38,7 @@ let crawler = new Crawler({
                     currAttr = $(item).attr(attribute);
                     if(currAttr && currAttr.indexOf('http:') > -1) {
                         bad = true;
+                        badUrls.push(currAttr);
                     }
                 }
             })
@@ -44,6 +46,10 @@ let crawler = new Crawler({
 
         if(bad) {
             console.log(colors.red(`===> ${data.url} has active mixed content!`));
+
+            for (var i = 0; i < badUrls.length; i++) {
+                console.log(colors.yellow("==> " + String(badUrls[i])));
+            }
             badCount++
         } else {
             console.log(colors.green(`${data.url} is good!`));
